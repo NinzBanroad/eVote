@@ -1,7 +1,7 @@
 {
-  "name": "evote",
+  "name": "evote-admin",
   "version": "1.0.0",
-  "description": "Voting System",
+  "description": "Admin Voting System",
   "main": "server.js",
   "scripts": {
     "start": "nodemon server"
