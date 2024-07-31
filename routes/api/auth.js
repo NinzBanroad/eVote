@@ -10,10 +10,34 @@ const User = require('../../models/User');
 const Admin = require('../../models/Admin');
 const Candidate = require('../../models/Candidate');
 
+// @route    GET api/auth/get/user-role
+// @desc     Get user/admin/candidate by token
+// @access   Private
+router.get('/get/user-role', auth, async (req, res) => {
+  try {
+    if (req.data.role === 'user') {
+      const user = await User.findById(req.data.id).select('-password');
+      res.json(user);
+    } else if (req.data.role === 'admin') {
+      const admin = await Admin.findById(req.data.id).select('-password');
+      res.json(admin);
+    } else {
+      const candidate = await Candidate.findById(req.data.id).select(
+        '-password'
+      );
+      res.json(candidate);
+    }
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
 // @route    GET api/auth
 // @desc     Get user by token
 // @access   Private
-router.get('/', auth, async (req, res) => {
+router.get('/get/user', auth, async (req, res) => {
+  console.log('user', req.user.id);
   try {
     const user = await User.findById(req.user.id).select('-password');
     res.json(user);
@@ -26,7 +50,8 @@ router.get('/', auth, async (req, res) => {
 // @route    GET api/auth
 // @desc     Get Admin by token
 // @access   Private
-router.get('/', auth, async (req, res) => {
+router.get('/get/admin', auth, async (req, res) => {
+  console.log('admin', req.admin.id);
   try {
     const admin = await Admin.findById(req.admin.id).select('-password');
     res.json(admin);
@@ -39,7 +64,8 @@ router.get('/', auth, async (req, res) => {
 // @route    GET api/auth
 // @desc     Get candidate by token
 // @access   Private
-router.get('/', auth, async (req, res) => {
+router.get('/get/candidate', auth, async (req, res) => {
+  console.log('candidate', req.candidate.id);
   try {
     const candidate = await Candidate.findById(req.candidate.id).select(
       '-password'
@@ -50,6 +76,43 @@ router.get('/', auth, async (req, res) => {
     res.status(500).send('Server Error');
   }
 });
+
+// @route    POST api/auth/user-type
+// @desc     Authenticate User & get User Type
+// @access   Public
+router.post(
+  '/user-type',
+  check('email', 'Please include a valid email').isEmail(),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { email } = req.body;
+
+    try {
+      let user = await User.findOne({ email });
+      let admin = await Admin.findOne({ email });
+      let candidate = await Candidate.findOne({ email });
+
+      if (user) {
+        res.json(user.role);
+      } else if (admin) {
+        res.json(admin.role);
+      } else if (candidate) {
+        res.json(candidate.role);
+      } else {
+        return res
+          .status(400)
+          .json({ errors: [{ msg: 'Invalid Credentials' }] });
+      }
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server error');
+    }
+  }
+);
 
 // @route    POST api/auth
 // @desc     Authenticate User & get token
@@ -84,8 +147,9 @@ router.post(
       }
 
       const payload = {
-        user: {
+        data: {
           id: user.id,
+          role: user.role,
         },
       };
 
@@ -95,7 +159,7 @@ router.post(
         { expiresIn: '5 days' },
         (err, token) => {
           if (err) throw err;
-          res.json({ token });
+          res.json({ user, token });
         }
       );
     } catch (err) {
@@ -138,8 +202,9 @@ router.post(
       }
 
       const payload = {
-        admin: {
+        data: {
           id: admin.id,
+          role: admin.role,
         },
       };
 
@@ -149,7 +214,7 @@ router.post(
         { expiresIn: '5 days' },
         (err, token) => {
           if (err) throw err;
-          res.json({ token });
+          res.json({ admin, token });
         }
       );
     } catch (err) {
@@ -192,8 +257,9 @@ router.post(
       }
 
       const payload = {
-        candidate: {
+        data: {
           id: candidate.id,
+          role: candidate.role,
         },
       };
 
@@ -203,7 +269,7 @@ router.post(
         { expiresIn: '5 days' },
         (err, token) => {
           if (err) throw err;
-          res.json({ token });
+          res.json({ candidate, token });
         }
       );
     } catch (err) {

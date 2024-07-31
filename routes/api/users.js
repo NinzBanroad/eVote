@@ -1,73 +1,93 @@
 const express = require('express');
 const router = express.Router();
-
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const config = require('config');
+const auth = require('../../middleware/auth');
 const { check, validationResult } = require('express-validator');
+const checkObjectId = require('../../middleware/checkObjectId');
 
 const User = require('../../models/User');
+const Candidate = require('../../models/Candidate');
+const UserVote = require('../../models/UserVote');
 
-// @route    POST api/users
-// @desc     Register User
-// @access   Public
-router.post(
-  '/',
-  check('name', 'Name is required').notEmpty(),
-  check('email', 'Please include a valid email').isEmail(),
-  check(
-    'password',
-    'Please enter a password with 6 or more characters'
-  ).isLength({ min: 6 }),
+// @route    GET api/users/all-candidates
+// @desc     Get all candidates
+// @access   Private
+router.get('/all-candidates', auth, async (req, res) => {
+  try {
+    const candidates = await Candidate.find();
+    res.json(candidates);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
+// @route    GET api/user/vote/:user_id
+// @desc     Get votes by User ID
+// @access   Private
+router.get(
+  '/vote/:user_id',
+  auth,
+  checkObjectId('user_id'),
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const { name, email, password } = req.body;
-
     try {
-      let user = await User.findOne({ email });
-
-      if (user) {
-        return res
-          .status(400)
-          .json({ errors: [{ msg: 'User already exists' }] });
+      const data = {};
+      const uservote = await UserVote.findOne({
+        user: req.params.user_id,
+      }).populate('user');
+      if (!uservote) {
+        return res.status(404).json({ msg: 'Vote not found' });
       }
 
-      user = new User({
-        name,
-        email,
-        password,
+      data.user = uservote.user;
+      data.chairman = await Candidate.findOne({
+        _id: uservote.chairman.toString(),
+      });
+      const newCouncelors = [];
+      for (let i = 0; i < uservote.councelors.length; i++) {
+        const councelors = await Candidate.findOne({
+          _id: uservote.councelors[i].toString(),
+        });
+        newCouncelors.push(councelors);
+      }
+      data.councelors = newCouncelors;
+      data.skchairman = await Candidate.findOne({
+        _id: uservote.skchairman.toString(),
       });
 
-      const salt = await bcrypt.genSalt(10);
-
-      user.password = await bcrypt.hash(password, salt);
-
-      await user.save();
-
-      const payload = {
-        user: {
-          id: user.id,
-        },
-      };
-
-      jwt.sign(
-        payload,
-        config.get('jwtSecret'),
-        { expiresIn: '5 days' },
-        (err, token) => {
-          if (err) throw err;
-          res.json({ token });
-        }
-      );
+      res.json(data);
     } catch (err) {
       console.error(err.message);
-      res.status(500).send('Server error');
+
+      res.status(500).send('Server Error');
     }
   }
 );
+
+// @route    POST api/users/add-vote
+// @desc     Create a vote
+// @access   Private
+router.post('/add-vote', auth, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  const { user, chairman, councelors, skchairman } = req.body;
+
+  try {
+    const newUserVote = new UserVote({
+      user: user,
+      chairman: chairman,
+      councelors: councelors,
+      skchairman: skchairman,
+    });
+
+    const uservote = await newUserVote.save();
+
+    res.json(uservote);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
 
 module.exports = router;

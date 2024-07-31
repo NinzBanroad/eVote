@@ -1,10 +1,13 @@
 {
-  "name": "evote-admin",
+  "name": "evote",
   "version": "1.0.0",
   "description": "Admin Voting System",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon server"
+    "start": "node server",
+    "server": "nodemon server",
+    "client": "npm start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run  client\""
   },
   "author": "Ninz Banroad",
   "license": "ISC",
