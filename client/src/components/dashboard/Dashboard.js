@@ -7,6 +7,8 @@ import { getAllCandidates } from '../../actions/candidate';
 import AdminDashboard from './AdminDashboard';
 import CandidateDashboard from './CandidateDashboard';
 import UserDashboard from './UserDashboard';
+import UserReceipt from '../users/UserReceipt';
+import CandidateReceipt from '../candidates/CandidateReceipt';
 
 const Dashboard = ({
   getAllCandidates,

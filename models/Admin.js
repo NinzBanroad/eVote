@@ -18,6 +18,10 @@ const AdminSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  hasvoted: {
+    type: Boolean,
+    default: false,
+  },
   date: {
     type: Date,
     default: Date.now,

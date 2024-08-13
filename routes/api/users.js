@@ -38,6 +38,8 @@ router.get(
         return res.status(404).json({ msg: 'Vote not found' });
       }
 
+      data.id = uservote._id;
+      data.date = uservote.date;
       data.user = uservote.user;
       data.chairman = await Candidate.findOne({
         _id: uservote.chairman.toString(),
@@ -82,6 +84,13 @@ router.post('/add-vote', auth, async (req, res) => {
     });
 
     const uservote = await newUserVote.save();
+
+    //after voting we'll update the hasvoted field to true
+    await User.findOneAndUpdate(
+      { _id: user },
+      { $set: { hasvoted: true } },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
 
     res.json(uservote);
   } catch (err) {

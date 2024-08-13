@@ -7,6 +7,9 @@ import Alert from './components/layout/Alert';
 import NotFound from './components/layout/NotFound';
 import PrivateRoute from './components/routing/PrivateRoute';
 import Dashboard from './components/dashboard/Dashboard';
+import UserReceipt from './components/users/UserReceipt';
+import CandidateReceipt from './components/candidates/CandidateReceipt';
+
 import { LOGOUT } from './actions/types';
 
 // Redux
@@ -47,6 +50,14 @@ const App = () => {
           <Route
             path='dashboard'
             element={<PrivateRoute component={Dashboard} />}
+          />
+          <Route
+            path='/user-receipt'
+            element={<PrivateRoute component={UserReceipt} />}
+          />
+          <Route
+            path='/candidate-receipt'
+            element={<PrivateRoute component={CandidateReceipt} />}
           />
           <Route path='/*' element={<NotFound />} />
         </Routes>
