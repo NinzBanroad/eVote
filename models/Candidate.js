@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const CandidateSchema = new mongoose.Schema({
+  avatar: {
+    type: String,
+    required: true,
+  },
   role: {
     type: String,
     required: true,
@@ -49,6 +53,10 @@ const CandidateSchema = new mongoose.Schema({
   hasvoted: {
     type: Boolean,
     default: false,
+  },
+  platform: {
+    type: String,
+    default: null,
   },
   date: {
     type: Date,

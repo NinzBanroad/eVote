@@ -8,7 +8,7 @@ const Navbar = ({ auth: { isAuthenticated, user }, logout }) => {
   const authLinks = (
     <ul>
       <li>
-        <Link to='/profiles'>{user && user.role}</Link>
+        <span>{user && user.role}</span>
       </li>
       <li>
         <a onClick={logout} href='#!'>

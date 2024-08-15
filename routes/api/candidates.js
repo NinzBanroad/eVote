@@ -7,6 +7,24 @@ const { check, validationResult } = require('express-validator');
 const Candidate = require('../../models/Candidate');
 const CandidateVote = require('../../models/CandidateVote');
 
+// @route    GET api/candidates/current-candidate
+// @desc     Get platform by Candidate ID
+// @access   Private
+router.get(
+  '/current-candidate/:candidate_id',
+  auth,
+  checkObjectId('candidate_id'),
+  async (req, res) => {
+    try {
+      const candidate = await Candidate.findById(req.params.candidate_id);
+      res.json(candidate);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server Error');
+    }
+  }
+);
+
 // @route    GET api/candidates/all-candidates
 // @desc     Get all candidates
 // @access   Private
@@ -97,5 +115,70 @@ router.post('/add-vote', auth, async (req, res) => {
     res.status(500).send('Server Error');
   }
 });
+
+// @route    GET api/candidates/get-platform
+// @desc     Get platform by Candidate ID
+// @access   Private
+router.get(
+  '/get-platform/:candidate_id',
+  auth,
+  checkObjectId('candidate_id'),
+  async (req, res) => {
+    try {
+      const candidate = await Candidate.findById(req.params.candidate_id);
+      res.json(candidate);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server Error');
+    }
+  }
+);
+
+// @route    POST api/candidates/add-platform
+// @desc     Create/Update a platform
+// @access   Private
+router.post('/add-platform', auth, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  const { candidate, platform } = req.body;
+
+  try {
+    const newPlatform = await Candidate.findOneAndUpdate(
+      { _id: candidate },
+      { $set: { platform: platform } },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+
+    res.json(newPlatform);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
+// @route    GET api/candidates/delete-platform/:candidate_id
+// @desc     Delete a platform
+// @access   Private
+router.post(
+  '/delete-platform/:candidate_id',
+  auth,
+  checkObjectId('candidate_id'),
+  async (req, res) => {
+    try {
+      const newPlatform = await Candidate.findOneAndUpdate(
+        { _id: req.params.candidate_id },
+        { $set: { platform: null } },
+        { new: true, upsert: true, setDefaultsOnInsert: true }
+      );
+
+      res.json(newPlatform);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server Error');
+    }
+  }
+);
 
 module.exports = router;

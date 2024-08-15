@@ -7,6 +7,7 @@ import Spinner from '../layout/Spinner';
 import { getAllCandidates } from '../../actions/candidate';
 import { addUserVote, getUserVote } from '../../actions/user';
 import { selectFields } from 'express-validator/lib/field-selection';
+import UserReceipt from '../users/UserReceipt';
 
 const UserDashboard = ({
   getAllCandidates,
@@ -93,73 +94,81 @@ const UserDashboard = ({
       {candidates === null ? (
         <Spinner />
       ) : (
-        <form onSubmit={onSubmit}>
-          <>
-            <h1 className='large text-primary'>User Dashboard</h1>
-            <p>Chairman</p>
-            {candidates.map((item) =>
-              item.position === 'Chairman' ? (
+        <>
+          {user.hasvoted === true ? (
+            navigate('/user-receipt')
+          ) : (
+            <>
+              <form onSubmit={onSubmit}>
                 <>
-                  <input
-                    type='radio'
-                    value={item._id}
-                    checked={selectedChairman === item._id}
-                    onChange={handleOnChangeChairman}
-                  />{' '}
-                  <label htmlFor={`custom-checkbox-${item._id}`}>
-                    {item.firstname} {item.lastname}
-                  </label>
-                  <br></br>
+                  <h1 className='large text-primary'>User Dashboard</h1>
+                  <p>Chairman</p>
+                  {candidates.map((item) =>
+                    item.position === 'Chairman' ? (
+                      <>
+                        <input
+                          type='radio'
+                          value={item._id}
+                          checked={selectedChairman === item._id}
+                          onChange={handleOnChangeChairman}
+                        />{' '}
+                        <label htmlFor={`custom-checkbox-${item._id}`}>
+                          {item.firstname} {item.lastname}
+                        </label>
+                        <br></br>
+                      </>
+                    ) : (
+                      <></>
+                    )
+                  )}
+                  <br />
+                  <p>Councelors</p>
+                  {candidates.map((item, index) =>
+                    item.position === 'Councelor' ? (
+                      <>
+                        <div key={item._id} className='form-group'>
+                          <input
+                            type='checkbox'
+                            id={`custom-checkbox-${item._id}`}
+                            value={item._id}
+                            onChange={handleOnChangeCouncelors}
+                          />{' '}
+                          <label htmlFor={`custom-checkbox-${item._id}`}>
+                            {item.firstname} {item.lastname}{' '}
+                          </label>
+                        </div>
+                      </>
+                    ) : (
+                      <></>
+                    )
+                  )}
+                  <br />
+                  <p>SK Chairman</p>
+                  {candidates.map((item, index) =>
+                    item.position === 'SK Chairman' ? (
+                      <>
+                        <input
+                          type='radio'
+                          value={item._id}
+                          checked={selectedSKChairman === item._id}
+                          onChange={handleOnChangeSKChairman}
+                        />{' '}
+                        <label htmlFor={`custom-checkbox-${item._id}`}>
+                          {item.firstname} {item.lastname}
+                        </label>
+                        <br></br>
+                      </>
+                    ) : (
+                      <></>
+                    )
+                  )}
+                  <br />
+                  <input type='submit' value='Submit' />
                 </>
-              ) : (
-                <></>
-              )
-            )}
-            <br />
-            <p>Councelors</p>
-            {candidates.map((item, index) =>
-              item.position === 'Councelor' ? (
-                <>
-                  <div key={item._id} className='form-group'>
-                    <input
-                      type='checkbox'
-                      id={`custom-checkbox-${item._id}`}
-                      value={item._id}
-                      onChange={handleOnChangeCouncelors}
-                    />{' '}
-                    <label htmlFor={`custom-checkbox-${item._id}`}>
-                      {item.firstname} {item.lastname}{' '}
-                    </label>
-                  </div>
-                </>
-              ) : (
-                <></>
-              )
-            )}
-            <br />
-            <p>SK Chairman</p>
-            {candidates.map((item, index) =>
-              item.position === 'SK Chairman' ? (
-                <>
-                  <input
-                    type='radio'
-                    value={item._id}
-                    checked={selectedSKChairman === item._id}
-                    onChange={handleOnChangeSKChairman}
-                  />{' '}
-                  <label htmlFor={`custom-checkbox-${item._id}`}>
-                    {item.firstname} {item.lastname}
-                  </label>
-                  <br></br>
-                </>
-              ) : (
-                <></>
-              )
-            )}
-            <br />
-            <input type='submit' value='Submit' />
-          </>
-        </form>
+              </form>
+            </>
+          )}
+        </>
       )}
     </>
   );

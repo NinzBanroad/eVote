@@ -4,15 +4,17 @@ import { connect } from 'react-redux';
 import Navbar from '../layout/Navbar';
 import Spinner from '../layout/Spinner';
 import formatDate from '../../utils/formatDate';
-import { getCandidateVote } from '../../actions/candidate';
+import { getCandidateVote, getCurrentCandidate } from '../../actions/candidate';
 
 const CandidateReceipt = ({
   getCandidateVote,
+  getCurrentCandidate,
   auth: { user },
-  candidate: { loading, vote },
+  candidate: { hasvoted, loading, vote },
 }) => {
   useEffect(() => {
     getCandidateVote(user._id);
+    getCurrentCandidate(user._id);
   }, [getCandidateVote]);
 
   return (
@@ -20,7 +22,7 @@ const CandidateReceipt = ({
       <Navbar />
       {vote === null ? (
         <Spinner />
-      ) : (
+      ) : hasvoted === true ? (
         <section className='container'>
           <h1 className='large text-primary'>Thanks for Voting!</h1>
 
@@ -71,6 +73,10 @@ const CandidateReceipt = ({
             </>
           )}
         </section>
+      ) : (
+        <>
+          <Spinner />
+        </>
       )}
     </>
   );
@@ -78,6 +84,7 @@ const CandidateReceipt = ({
 
 CandidateReceipt.propTypes = {
   getCandidateVote: PropTypes.func.isRequired,
+  getCurrentCandidate: PropTypes.func.isRequired,
   candidate: PropTypes.object.isRequired,
   auth: PropTypes.object.isRequired,
 };
@@ -87,4 +94,7 @@ const mapStateToProps = (state) => ({
   auth: state.auth,
 });
 
-export default connect(mapStateToProps, { getCandidateVote })(CandidateReceipt);
+export default connect(mapStateToProps, {
+  getCandidateVote,
+  getCurrentCandidate,
+})(CandidateReceipt);
