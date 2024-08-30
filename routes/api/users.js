@@ -8,13 +8,13 @@ const User = require('../../models/User');
 const Candidate = require('../../models/Candidate');
 const UserVote = require('../../models/UserVote');
 
-// @route    GET api/users/all-candidates
-// @desc     Get all candidates
+// @route    GET api/users/all-users
+// @desc     Get all users
 // @access   Private
-router.get('/all-candidates', auth, async (req, res) => {
+router.get('/all-users', auth, async (req, res) => {
   try {
-    const candidates = await Candidate.find();
-    res.json(candidates);
+    const users = await User.find();
+    res.json(users);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');

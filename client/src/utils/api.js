@@ -5,10 +5,23 @@ import { LOGOUT } from '../actions/types';
 // Create an instance of axios
 const api = axios.create({
   baseURL: '/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
+
+// Request interceptor for adding token to headers and configuring content type
+api.interceptors.request.use(
+  (config) => {
+    // Check if the data being sent is an instance of FormData
+    if (config.data instanceof FormData) {
+      config.headers['Content-Type'] = 'multipart/form-data';
+    } else {
+      config.headers['Content-Type'] = 'application/json';
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 /*
   NOTE: intercept any error responses from the api
  and check if the token is no longer valid.

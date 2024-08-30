@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
 
 const CandidateSchema = new mongoose.Schema({
-  avatar: {
+  image: {
     type: String,
-    required: true,
   },
   role: {
     type: String,

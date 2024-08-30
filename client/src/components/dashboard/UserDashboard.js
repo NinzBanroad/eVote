@@ -8,6 +8,7 @@ import { getAllCandidates } from '../../actions/candidate';
 import { addUserVote, getUserVote } from '../../actions/user';
 import { selectFields } from 'express-validator/lib/field-selection';
 import UserReceipt from '../users/UserReceipt';
+import Modal from '../layout/Modal';
 
 const UserDashboard = ({
   getAllCandidates,
@@ -25,7 +26,20 @@ const UserDashboard = ({
   const [selectedChairman, setSelectedChairman] = useState('');
   const [selectedSKChairman, setSelectedSKChairman] = useState('');
   const [selectedCouncelors, setSelectedCouncelors] = useState([]);
+  const [selectedCandidate, setSelectedCandidate] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const minSelection = 7;
+
+  //open modal when trigger and set the isModalOpen state to true
+  const openModal = (item) => {
+    setIsModalOpen(true);
+    setSelectedCandidate(item);
+  };
+
+  //close modal when trigger and set the isModalOpen state to false
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
 
   const handleOnChangeChairman = (e) => {
     const { value, checked } = e.target;
@@ -112,7 +126,10 @@ const UserDashboard = ({
                           checked={selectedChairman === item._id}
                           onChange={handleOnChangeChairman}
                         />{' '}
-                        <label htmlFor={`custom-checkbox-${item._id}`}>
+                        <label
+                          onClick={() => openModal(item)}
+                          style={{ cursor: 'pointer' }}
+                        >
                           {item.firstname} {item.lastname}
                         </label>
                         <br></br>
@@ -129,11 +146,13 @@ const UserDashboard = ({
                         <div key={item._id} className='form-group'>
                           <input
                             type='checkbox'
-                            id={`custom-checkbox-${item._id}`}
                             value={item._id}
                             onChange={handleOnChangeCouncelors}
                           />{' '}
-                          <label htmlFor={`custom-checkbox-${item._id}`}>
+                          <label
+                            onClick={() => openModal(item)}
+                            style={{ cursor: 'pointer' }}
+                          >
                             {item.firstname} {item.lastname}{' '}
                           </label>
                         </div>
@@ -153,7 +172,10 @@ const UserDashboard = ({
                           checked={selectedSKChairman === item._id}
                           onChange={handleOnChangeSKChairman}
                         />{' '}
-                        <label htmlFor={`custom-checkbox-${item._id}`}>
+                        <label
+                          onClick={() => openModal(item)}
+                          style={{ cursor: 'pointer' }}
+                        >
                           {item.firstname} {item.lastname}
                         </label>
                         <br></br>
@@ -170,6 +192,20 @@ const UserDashboard = ({
           )}
         </>
       )}
+      <Modal show={isModalOpen} onClose={closeModal}>
+        <div>
+          <h1>
+            {selectedCandidate.firstname} {selectedCandidate.lastname}
+          </h1>
+          {selectedCandidate.image && (
+            <img
+              src={require(`../../../../uploads/${selectedCandidate.image}`)}
+              alt='Uploaded'
+            />
+          )}
+          <p>{selectedCandidate.platform}</p>
+        </div>
+      </Modal>
     </>
   );
 };

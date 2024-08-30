@@ -35,8 +35,11 @@ const CandidateDashboard = ({
   const [selectedChairman, setSelectedChairman] = useState('');
   const [selectedSKChairman, setSelectedSKChairman] = useState('');
   const [selectedCouncelors, setSelectedCouncelors] = useState([]);
+  const [selectedCandidate, setSelectedCandidate] = useState('');
   const [activeTab, setActiveTab] = useState('Vote');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpenCandidateInfo, setIsModalOpenCandidateInfo] =
+    useState(false);
   const [platformData, setPlatformData] = useState({ candidateplatform: '' });
   const minSelection = 7;
   const navigate = useNavigate();
@@ -50,6 +53,17 @@ const CandidateDashboard = ({
   //close modal when trigger and set the isModalOpen state to false
   const closeModal = () => {
     setIsModalOpen(false);
+  };
+
+  //open modal when trigger and set the isModalOpen state to true
+  const openModalCandidateInfo = (item) => {
+    setIsModalOpenCandidateInfo(true);
+    setSelectedCandidate(item);
+  };
+
+  //close modal when trigger and set the isModalOpen state to false
+  const closeModalCandidateInfo = () => {
+    setIsModalOpenCandidateInfo(false);
   };
 
   const handleDeletePlatform = () => {
@@ -159,7 +173,7 @@ const CandidateDashboard = ({
         <Spinner />
       ) : (
         <>
-          {hasvoted === true ? (
+          {hasvoted && hasvoted === true ? (
             navigate('/candidate-receipt')
           ) : (
             <>
@@ -199,7 +213,11 @@ const CandidateDashboard = ({
                                 checked={selectedChairman === item._id}
                                 onChange={handleOnChangeChairman}
                               />{' '}
-                              <label htmlFor={`custom-checkbox-${item._id}`}>
+                              <label
+                                htmlFor={`custom-checkbox-${item._id}`}
+                                onClick={() => openModalCandidateInfo(item)}
+                                style={{ cursor: 'pointer' }}
+                              >
                                 {item.firstname} {item.lastname}
                               </label>
                               <br></br>
@@ -216,11 +234,13 @@ const CandidateDashboard = ({
                               <div key={item._id} className='form-group'>
                                 <input
                                   type='checkbox'
-                                  id={`custom-checkbox-${item._id}`}
                                   value={item._id}
                                   onChange={handleOnChangeCouncelors}
                                 />{' '}
-                                <label htmlFor={`custom-checkbox-${item._id}`}>
+                                <label
+                                  onClick={() => openModalCandidateInfo(item)}
+                                  style={{ cursor: 'pointer' }}
+                                >
                                   {item.firstname} {item.lastname}{' '}
                                 </label>
                               </div>
@@ -240,7 +260,10 @@ const CandidateDashboard = ({
                                 checked={selectedSKChairman === item._id}
                                 onChange={handleOnChangeSKChairman}
                               />{' '}
-                              <label htmlFor={`custom-checkbox-${item._id}`}>
+                              <label
+                                onClick={() => openModalCandidateInfo(item)}
+                                style={{ cursor: 'pointer' }}
+                              >
                                 {item.firstname} {item.lastname}
                               </label>
                               <br></br>
@@ -277,10 +300,25 @@ const CandidateDashboard = ({
             name='candidateplatform'
             onChange={onChangePlatform}
             value={candidateplatform}
+            required
           ></textarea>
           <br />
           <input type='submit' value='Submit' />
         </form>
+      </Modal>
+      <Modal show={isModalOpenCandidateInfo} onClose={closeModalCandidateInfo}>
+        <div>
+          <h1>
+            {selectedCandidate.firstname} {selectedCandidate.lastname}
+          </h1>
+          {selectedCandidate.image && (
+            <img
+              src={require(`../../../../uploads/${selectedCandidate.image}`)}
+              alt='Uploaded'
+            />
+          )}
+          <p>{selectedCandidate.platform}</p>
+        </div>
       </Modal>
     </>
   );

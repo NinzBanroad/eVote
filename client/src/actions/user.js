@@ -5,6 +5,9 @@ import {
   ADD_USER_VOTE_ERROR,
   GET_USER_VOTE,
   GET_USER_VOTE_ERROR,
+  GET_ALL_USERS,
+  GET_ALL_USERS_ERROR,
+  CLEAR_PROFILE,
 } from './types';
 
 /*
@@ -44,6 +47,24 @@ export const getUserVote = (id) => async (dispatch) => {
   } catch (err) {
     dispatch({
       type: GET_USER_VOTE_ERROR,
+      payload: { msg: err.response.statusText, status: err.response.status },
+    });
+  }
+};
+
+// Get all Users
+export const getAllUsers = () => async (dispatch) => {
+  dispatch({ type: CLEAR_PROFILE });
+
+  try {
+    const res = await api.get('/users/all-users');
+    dispatch({
+      type: GET_ALL_USERS,
+      payload: res.data,
+    });
+  } catch (err) {
+    dispatch({
+      type: GET_ALL_USERS_ERROR,
       payload: { msg: err.response.statusText, status: err.response.status },
     });
   }

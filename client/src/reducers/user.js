@@ -3,6 +3,8 @@ import {
   ADD_USER_VOTE_ERROR,
   GET_USER_VOTE,
   GET_USER_VOTE_ERROR,
+  GET_ALL_USERS,
+  GET_ALL_USERS_ERROR,
 } from '../actions/types';
 
 const initialState = {
@@ -10,6 +12,7 @@ const initialState = {
   vote: null,
   loading: true,
   error: {},
+  users: [],
 };
 
 function userReducer(state = initialState, action) {
@@ -38,6 +41,19 @@ function userReducer(state = initialState, action) {
         ...state,
         error: payload,
         loading: false,
+      };
+    case GET_ALL_USERS:
+      return {
+        ...state,
+        users: payload,
+        loading: false,
+      };
+    case GET_ALL_USERS_ERROR:
+      return {
+        ...state,
+        error: payload,
+        loading: false,
+        users: null,
       };
     default:
       return state;

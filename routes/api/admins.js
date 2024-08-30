@@ -6,10 +6,47 @@ const jwt = require('jsonwebtoken');
 const config = require('config');
 const { check, validationResult } = require('express-validator');
 const checkObjectId = require('../../middleware/checkObjectId');
+const multer = require('multer');
+const path = require('path');
 
 const Admin = require('../../models/Admin');
 const User = require('../../models/User');
 const Candidate = require('../../models/Candidate');
+
+// Set up storage engine
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './uploads');
+  },
+  filename: function (req, file, cb) {
+    cb(
+      null,
+      file.fieldname + '-' + Date.now() + path.extname(file.originalname)
+    );
+  },
+});
+
+// Check file type
+function checkFileType(file, cb) {
+  const filetypes = /jpeg|jpg|png|gif/;
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = filetypes.test(file.mimetype);
+
+  if (extname && mimetype) {
+    return cb(null, true);
+  } else {
+    cb('Error: Images Only!');
+  }
+}
+
+// Init Upload
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 1000000 }, // 1MB
+  fileFilter: function (req, file, cb) {
+    checkFileType(file, cb);
+  },
+});
 
 // @route    GET api/admins/all-users
 // @desc     Get all users
@@ -106,7 +143,7 @@ router.post(
 //@access Private
 router.post(
   '/add-user',
-  auth,
+  [auth, upload.single('image')],
   [
     check('role', 'Role is required').not().isEmpty(),
     check('firstname', 'Firstname is required').not().isEmpty(),
@@ -141,9 +178,12 @@ router.post(
       citizenship,
     } = req.body;
 
+    const image = req.file ? req.file.filename : null;
+
     //Build user fields object
     const userFields = {};
 
+    if (image) userFields.image = image;
     if (role) userFields.role = role;
     if (firstname) userFields.firstname = firstname;
     if (lastname) userFields.lastname = lastname;
@@ -200,7 +240,7 @@ router.post(
 //@access Private
 router.post(
   '/add-candidate',
-  auth,
+  [auth, upload.single('image')],
   [
     check('role', 'Role is required').not().isEmpty(),
     check('position', 'Position is required').not().isEmpty(),
@@ -219,6 +259,7 @@ router.post(
   ],
   async (req, res) => {
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
@@ -237,9 +278,11 @@ router.post(
       citizenship,
     } = req.body;
 
-    //Build user fields object
-    const candidateFields = {};
+    const image = req.file ? req.file.filename : null;
 
+    //Build candidate fields object
+    const candidateFields = {};
+    if (image) candidateFields.image = image;
     if (role) candidateFields.role = role;
     if (position) candidateFields.position = position;
     if (firstname) candidateFields.firstname = firstname;
@@ -296,17 +339,13 @@ router.post(
 // @access   Private
 router.put(
   '/update-user/:user_id',
-  auth,
+  [auth, upload.single('image')],
   checkObjectId('user_id'),
   [
     check('role', 'Role is required').not().isEmpty(),
     check('firstname', 'Firstname is required').not().isEmpty(),
     check('lastname', 'Lastname is required').not().isEmpty(),
     check('email', 'Please include a valid email').isEmail(),
-    check(
-      'password',
-      'Please enter a password with 6 or more characters'
-    ).isLength({ min: 6 }),
     check('age', 'Age is required').not().isEmpty(),
     check('birthdate', 'Birthdate is required').not().isEmpty(),
     check('address', 'Address is required').not().isEmpty(),
@@ -324,7 +363,6 @@ router.put(
       firstname,
       lastname,
       email,
-      password,
       age,
       birthdate,
       address,
@@ -332,14 +370,15 @@ router.put(
       citizenship,
     } = req.body;
 
-    //Build user fields object
-    const userFields = {};
+    const image = req.file ? req.file.filename : null;
 
+    //Build candidate fields object
+    const userFields = {};
+    if (image) userFields.image = image;
     if (role) userFields.role = role;
     if (firstname) userFields.firstname = firstname;
     if (lastname) userFields.lastname = lastname;
     if (email) userFields.email = email;
-    if (password) userFields.password = password;
     if (age) userFields.age = age;
     if (birthdate) userFields.birthdate = birthdate;
     if (address) userFields.address = address;
@@ -365,7 +404,7 @@ router.put(
 // @access   Private
 router.put(
   '/update-candidate/:candidate_id',
-  auth,
+  [auth, upload.single('image')],
   checkObjectId('candidate_id'),
   [
     check('role', 'Role is required').not().isEmpty(),
@@ -373,10 +412,6 @@ router.put(
     check('firstname', 'Firstname is required').not().isEmpty(),
     check('lastname', 'Lastname is required').not().isEmpty(),
     check('email', 'Please include a valid email').isEmail(),
-    check(
-      'password',
-      'Please enter a password with 6 or more characters'
-    ).isLength({ min: 6 }),
     check('age', 'Age is required').not().isEmpty(),
     check('birthdate', 'Birthdate is required').not().isEmpty(),
     check('address', 'Address is required').not().isEmpty(),
@@ -395,7 +430,6 @@ router.put(
       firstname,
       lastname,
       email,
-      password,
       age,
       birthdate,
       address,
@@ -403,15 +437,16 @@ router.put(
       citizenship,
     } = req.body;
 
-    //Build user fields object
-    const candidateFields = {};
+    const image = req.file ? req.file.filename : null;
 
+    //Build candidate fields object
+    const candidateFields = {};
+    if (image) candidateFields.image = image;
     if (role) candidateFields.role = role;
     if (position) candidateFields.position = position;
     if (firstname) candidateFields.firstname = firstname;
     if (lastname) candidateFields.lastname = lastname;
     if (email) candidateFields.email = email;
-    if (password) candidateFields.password = password;
     if (age) candidateFields.age = age;
     if (birthdate) candidateFields.birthdate = birthdate;
     if (address) candidateFields.address = address;
@@ -474,5 +509,20 @@ router.delete(
     }
   }
 );
+
+// Route to get a specific image by ID
+router.get('/image/:id', async (req, res) => {
+  try {
+    const candidate = await Candidate.findById(req.params.id);
+
+    if (!candidate) {
+      return res.status(404).send('Candidate not found');
+    }
+
+    res.send(candidate.data);
+  } catch (err) {
+    res.status(500).send('Server error');
+  }
+});
 
 module.exports = router;
