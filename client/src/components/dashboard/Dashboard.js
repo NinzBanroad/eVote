@@ -24,7 +24,7 @@ const Dashboard = ({
       {user === null ? (
         <Spinner />
       ) : (
-        <section className='container'>
+        <section className='dashboard-container'>
           {user.role === 'admin' ? <AdminDashboard /> : <></>}
           {user.role === 'candidate' ? <CandidateDashboard /> : <></>}
           {user.role === 'user' ? <UserDashboard /> : <></>}

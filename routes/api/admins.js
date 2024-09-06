@@ -79,7 +79,8 @@ router.get('/all-candidates', auth, async (req, res) => {
 // @access   Public
 router.post(
   '/',
-  check('name', 'Name is required').notEmpty(),
+  check('firstname', 'Firstname is required').notEmpty(),
+  check('lastname', 'Lastname is required').notEmpty(),
   check('role', 'Role is required').notEmpty(),
   check('email', 'Please include a valid email').isEmail(),
   check(
@@ -92,7 +93,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, role, email, password } = req.body;
+    const { firstname, lastname, role, email, password } = req.body;
 
     try {
       let admin = await Admin.findOne({ email });
@@ -104,7 +105,8 @@ router.post(
       }
 
       admin = new Admin({
-        name,
+        firstname,
+        lastname,
         role,
         email,
         password,

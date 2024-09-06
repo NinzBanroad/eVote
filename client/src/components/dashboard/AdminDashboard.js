@@ -13,6 +13,8 @@ import {
 } from '../../actions/admin';
 import Spinner from '../layout/Spinner';
 import Modal from '../layout/Modal';
+import formatDate from '../../utils/formatDate';
+import Moment from 'react-moment';
 
 const initialState = {
   role: '',
@@ -82,6 +84,7 @@ const AdminDashboard = ({
   //close modal when trigger and set the isModalOpen state to false
   const closeModalAddUserForm = () => {
     setIsModalOpenAddUserForm(false);
+    setFormData(initialState);
   };
 
   //open modal when trigger and set the isModalOpen state to true
@@ -99,6 +102,7 @@ const AdminDashboard = ({
   //close modal when trigger and set the isModalOpen state to false
   const closeModalUpdateUserForm = () => {
     setIsModalOpenUpdateUserForm(false);
+    setFormData(initialState);
   };
 
   //open modal when trigger and set the isModalOpen state to true
@@ -109,6 +113,7 @@ const AdminDashboard = ({
   //close modal when trigger and set the isModalOpen state to false
   const closeModalAddCandidateForm = () => {
     setIsModalOpenAddCandidateForm(false);
+    setFormData(initialState);
   };
 
   //open modal when trigger and set the isModalOpen state to true
@@ -126,6 +131,7 @@ const AdminDashboard = ({
   //close modal when trigger and set the isModalOpen state to false
   const closeModalUpdateCandidateForm = () => {
     setIsModalOpenUpdateCandidateForm(false);
+    setFormData(initialState);
   };
 
   const handleTabClick = (tab) => {
@@ -236,6 +242,30 @@ const AdminDashboard = ({
     setIsModalOpenUpdateCandidateForm(false);
   };
 
+  const onDeleteUser = (id) => {
+    const confirmation = window.confirm(
+      'Are you sure you want to delete this user?'
+    );
+
+    if (confirmation === false) {
+      return false;
+    } else {
+      deleteUser(id);
+    }
+  };
+
+  const onDeleteCandidate = (id) => {
+    const confirmation = window.confirm(
+      'Are you sure you want to delete this candidate?'
+    );
+
+    if (confirmation === false) {
+      return false;
+    } else {
+      deleteCandidate(id);
+    }
+  };
+
   return (
     <>
       <h1 className='large text-primary'>Admin Dashboard</h1>
@@ -261,15 +291,24 @@ const AdminDashboard = ({
         <div className='tab-content'>
           {'Users' === activeTab ? (
             <div key={'Users'}>
-              <button onClick={openModalAddUserForm}>
+              <button
+                onClick={openModalAddUserForm}
+                className='btn btn-primary'
+              >
                 <i className='fa-solid fa-user-plus' /> Add User&nbsp;
               </button>
               <table className='styled-table'>
                 <thead>
                   <tr>
-                    <th>Role</th>
                     <th>Firstname</th>
                     <th>Lastname</th>
+                    <th>Email</th>
+                    <th>Age</th>
+                    <th>Birthdate</th>
+                    <th>Address</th>
+                    <th>Civil Status</th>
+                    <th>Citizenship</th>
+                    <th>Has Voted</th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -280,9 +319,15 @@ const AdminDashboard = ({
                     <>
                       {users.map((user) => (
                         <tr>
-                          <td>{user.role}</td>
                           <td>{user.firstname}</td>
                           <td>{user.lastname}</td>
+                          <td>{user.email}</td>
+                          <td>{user.age}</td>
+                          <td>{formatDate(user.birthdate)}</td>
+                          <td>{user.address}</td>
+                          <td>{user.civilstatus}</td>
+                          <td>{user.citizenship}</td>
+                          <td>{user.hasvoted === true ? 'Yes' : 'No'}</td>
                           <td>
                             <i
                               className='fa-solid fa-pen-to-square text-primary'
@@ -291,7 +336,7 @@ const AdminDashboard = ({
                             &nbsp;&nbsp;
                             <i
                               className='fa-solid fa-trash text-danger'
-                              onClick={() => deleteUser(user._id)}
+                              onClick={() => onDeleteUser(user._id)}
                             />
                           </td>
                         </tr>
@@ -303,7 +348,10 @@ const AdminDashboard = ({
             </div>
           ) : (
             <div key={'Candidates'}>
-              <button onClick={openModalAddCandidateForm}>
+              <button
+                onClick={openModalAddCandidateForm}
+                className='btn btn-primary'
+              >
                 <i className='fa-solid fa-user-plus' /> Add Candidate&nbsp;
               </button>
               <table className='styled-table'>
@@ -312,6 +360,13 @@ const AdminDashboard = ({
                     <th>Position</th>
                     <th>Firstname</th>
                     <th>Lastname</th>
+                    <th>Email</th>
+                    <th>Age</th>
+                    <th>Birthdate</th>
+                    <th>Address</th>
+                    <th>Civil Status</th>
+                    <th>Citizenship</th>
+                    <th>Has Voted</th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -325,6 +380,13 @@ const AdminDashboard = ({
                           <td>{candidate.position}</td>
                           <td>{candidate.firstname}</td>
                           <td>{candidate.lastname}</td>
+                          <td>{candidate.email}</td>
+                          <td>{candidate.age}</td>
+                          <td>{formatDate(candidate.birthdate)}</td>
+                          <td>{candidate.address}</td>
+                          <td>{candidate.civilstatus}</td>
+                          <td>{candidate.citizenship}</td>
+                          <td>{candidate.hasvoted === true ? 'Yes' : 'No'}</td>
                           <td>
                             <i
                               className='fa-solid fa-pen-to-square text-primary'
@@ -335,7 +397,7 @@ const AdminDashboard = ({
                             &nbsp;&nbsp;
                             <i
                               className='fa-solid fa-trash text-danger'
-                              onClick={() => deleteCandidate(candidate._id)}
+                              onClick={() => onDeleteCandidate(candidate._id)}
                             />
                           </td>
                         </tr>
@@ -350,19 +412,21 @@ const AdminDashboard = ({
       </div>
       {/* Add User Form */}
       <Modal show={isModalOpenAddUserForm} onClose={closeModalAddUserForm}>
-        <form onSubmit={onSubmitAddUser}>
+        <form className='form' onSubmit={onSubmitAddUser}>
           <h1>ADD USER FORM</h1>
           <label>Choose Profile:</label>
           <input type='file' onChange={onChangeProfile} />
+          <br />
           <label>Role:</label>&nbsp;
           <label>User</label>
           <br />
-          <label>First name:</label>
+          <label>Firstname:</label>
           <input
             type='text'
             name='firstname'
             value={firstname}
             onChange={onChange}
+            required
           />
           <br />
           <label>Lastname:</label>
@@ -371,10 +435,17 @@ const AdminDashboard = ({
             name='lastname'
             value={lastname}
             onChange={onChange}
+            required
           />
           <br />
           <label>Email:</label>
-          <input type='email' name='email' value={email} onChange={onChange} />
+          <input
+            type='email'
+            name='email'
+            value={email}
+            onChange={onChange}
+            required
+          />
           <br />
           <label>Password:</label>
           <input
@@ -382,10 +453,17 @@ const AdminDashboard = ({
             name='password'
             value={password}
             onChange={onChange}
+            required
           />
           <br />
           <label>Age:</label>
-          <input type='text' name='age' value={age} onChange={onChange} />
+          <input
+            type='text'
+            name='age'
+            value={age}
+            onChange={onChange}
+            required
+          />
           <br />
           <label for='birthday'>Birthday:</label>
           <input
@@ -393,6 +471,7 @@ const AdminDashboard = ({
             name='birthdate'
             value={birthdate}
             onChange={onChangeDate}
+            required
           />
           <br />
           <label>Address:</label>
@@ -401,6 +480,7 @@ const AdminDashboard = ({
             name='address'
             value={address}
             onChange={onChange}
+            required
           />
           <br />
           <label>Civil Status:</label>
@@ -409,6 +489,7 @@ const AdminDashboard = ({
             name='civilstatus'
             value={civilstatus}
             onChange={onChange}
+            required
           />
           <br />
           <label>Citizenship:</label>
@@ -417,6 +498,7 @@ const AdminDashboard = ({
             name='citizenship'
             value={citizenship}
             onChange={onChange}
+            required
           />
           <br />
           <input type='submit' value='Submit' />
@@ -427,7 +509,7 @@ const AdminDashboard = ({
         show={isModalOpenAddCandidateForm}
         onClose={closeModalAddCandidateForm}
       >
-        <form onSubmit={onSubmitAddCandidate}>
+        <form className='form' onSubmit={onSubmitAddCandidate}>
           <h1>ADD CANDIDATE FORM</h1>
           <label>Choose Profile:</label>
           <input type='file' onChange={onChangeProfile} />
@@ -435,18 +517,25 @@ const AdminDashboard = ({
           <label>Candidate</label>
           <br />
           <label>Position:</label>
-          <select name='position' id='position' onChange={onChangePosition}>
+          <select
+            name='position'
+            id='position'
+            onChange={onChangePosition}
+            required
+          >
+            <option value=''></option>
             <option value='Chairman'>Chairman</option>
             <option value='Councelor'>Councelor</option>
             <option value='SK Chairman'>SK Chairman</option>
           </select>
           <br />
-          <label>First name:</label>
+          <label>Firstname:</label>
           <input
             type='text'
             name='firstname'
             value={firstname}
             onChange={onChange}
+            required
           />
           <br />
           <label>Lastname:</label>
@@ -455,10 +544,17 @@ const AdminDashboard = ({
             name='lastname'
             value={lastname}
             onChange={onChange}
+            required
           />
           <br />
           <label>Email:</label>
-          <input type='email' name='email' value={email} onChange={onChange} />
+          <input
+            type='email'
+            name='email'
+            value={email}
+            onChange={onChange}
+            required
+          />
           <br />
           <label>Password:</label>
           <input
@@ -466,10 +562,17 @@ const AdminDashboard = ({
             name='password'
             value={password}
             onChange={onChange}
+            required
           />
           <br />
           <label>Age:</label>
-          <input type='text' name='age' value={age} onChange={onChange} />
+          <input
+            type='text'
+            name='age'
+            value={age}
+            onChange={onChange}
+            required
+          />
           <br />
           <label for='birthday'>Birthday:</label>
           <input
@@ -477,6 +580,7 @@ const AdminDashboard = ({
             name='birthdate'
             value={birthdate}
             onChange={onChangeDate}
+            required
           />
           <br />
           <label>Address:</label>
@@ -485,6 +589,7 @@ const AdminDashboard = ({
             name='address'
             value={address}
             onChange={onChange}
+            required
           />
           <br />
           <label>Civil Status:</label>
@@ -493,6 +598,7 @@ const AdminDashboard = ({
             name='civilstatus'
             value={civilstatus}
             onChange={onChange}
+            required
           />
           <br />
           <label>Citizenship:</label>
@@ -501,6 +607,7 @@ const AdminDashboard = ({
             name='citizenship'
             value={citizenship}
             onChange={onChange}
+            required
           />
           <br />
           <input type='submit' value='Submit' />
@@ -511,10 +618,11 @@ const AdminDashboard = ({
         show={isModalOpenUpdateUserForm}
         onClose={closeModalUpdateUserForm}
       >
-        <form onSubmit={onSubmitUpdateUser}>
+        <form className='form' onSubmit={onSubmitUpdateUser}>
           <h1>UPDATE USER FORM</h1>
           <label>Choose Profile:</label>
           <input type='file' onChange={onChangeProfile} />
+          <br />
           <label>Role:</label>&nbsp;
           <label>User</label>
           <br />
@@ -544,7 +652,7 @@ const AdminDashboard = ({
           <input
             type='date'
             name='birthdate'
-            value={birthdate}
+            value={formatDate(birthdate)}
             onChange={onChangeDate}
           />
           <br />
@@ -580,7 +688,7 @@ const AdminDashboard = ({
         show={isModalOpenUpdateCandidateForm}
         onClose={closeModalUpdateCandidateForm}
       >
-        <form onSubmit={onSubmitUpdateCandidate}>
+        <form className='form' onSubmit={onSubmitUpdateCandidate}>
           <h1>UPDATE CANDIDATE FORM</h1>
           <label>Choose Profile:</label>
           <input type='file' onChange={onChangeProfile} />
@@ -620,7 +728,7 @@ const AdminDashboard = ({
           <input
             type='date'
             name='birthdate'
-            value={birthdate}
+            value={formatDate(birthdate)}
             onChange={onChangeDate}
           />
           <br />

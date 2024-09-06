@@ -1,5 +1,5 @@
 function formatDate(date) {
-  return new Intl.DateTimeFormat().format(new Date(date));
+  return date.split('T')[0];
 }
 
 export default formatDate;

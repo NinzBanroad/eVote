@@ -12,7 +12,7 @@ const Landing = ({ isAuthenticated }) => {
     <section className='landing'>
       <div className='dark-overlay'>
         <div className='landing-inner'>
-          <h1 className='x-large'>Philipphine Elections eVote 2025</h1>
+          <h1 className='x-large'>Philippines Barangay Election</h1>
           <p className='lead'>The choice for better change. Vote Wisely!</p>
           <div className='buttons'>
             <a
@@ -25,6 +25,10 @@ const Landing = ({ isAuthenticated }) => {
             <Link to='/login' className='btn btn-light'>
               Login
             </Link>
+          </div>
+          <br />
+          <div>
+            <small>Powered by eVote. All Rights Reserved 2024.</small>
           </div>
         </div>
       </div>
